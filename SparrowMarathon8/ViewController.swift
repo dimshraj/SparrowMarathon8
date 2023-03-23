@@ -7,42 +7,48 @@
 
 import UIKit
 
-class ViewController: UIViewController, UIScrollViewDelegate {
+class ViewController: UIViewController {
 
-    private lazy var scrollView: UIScrollView = {
+    private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.delegate = self
-//        scrollView.contentInsetAdjustmentBehavior = .never
         return scrollView
     }()
-    private let imageView = UIImageView(image: UIImage(systemName: "person.crop.circle.fill" ))
+    
+    private let avatar = UIImageView(image: UIImage(systemName: "person.crop.circle.fill" ))
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationController?.navigationBar.prefersLargeTitles = true
-        navigationController?.navigationItem.largeTitleDisplayMode = .always
-        view.backgroundColor = .systemBackground
-        self.title = "Avatar"
-        setupNavigationBar()
+        view.backgroundColor = .white
+        title = "Avatar"
         setupScrollView()
-        self.view.backgroundColor = .white
+        setupNavigationBar()
     }
     
-    private func setupNavigationBar() {
-
-        guard let navigationBar = self.navigationController?.navigationBar else { return }
-        navigationBar.addSubview(imageView)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            imageView.rightAnchor.constraint(equalTo: navigationBar.rightAnchor,
-                                             constant: -16),
-            imageView.bottomAnchor.constraint(equalTo: navigationBar.bottomAnchor,
-                                              constant: -5),
-            imageView.heightAnchor.constraint(equalToConstant: 40),
-            imageView.widthAnchor.constraint(equalTo: imageView.heightAnchor)
-        ])
+    func setupNavigationBar() {
+        
+        navigationController?.navigationBar.prefersLargeTitles = true
+        avatar.translatesAutoresizingMaskIntoConstraints = false
+        
+        guard let titleViewClass = NSClassFromString("_UINavigationBarLargeTitleView") else { return }
+        
+        DispatchQueue.main.async { [self] in
+            self.navigationController?.navigationBar.subviews.forEach { subview in
+               
+                guard subview.isKind (of: titleViewClass.self) else { return }
+                
+                subview.addSubview(avatar)
+                
+                NSLayoutConstraint.activate([
+                    avatar.bottomAnchor.constraint(equalTo: subview.bottomAnchor, constant: -12),
+                    avatar.trailingAnchor.constraint(equalTo: subview.trailingAnchor, constant: -view.directionalLayoutMargins.trailing),
+                    avatar.heightAnchor.constraint (equalToConstant: 40),
+                    avatar.widthAnchor.constraint (equalTo: avatar.heightAnchor)
+                ])
+            }
+        }
     }
-
+    
     private func setupScrollView() {
         view.addSubview(scrollView)
         NSLayoutConstraint.activate([
@@ -52,13 +58,9 @@ class ViewController: UIViewController, UIScrollViewDelegate {
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         self.scrollView.contentSize = .init(width: self.view.frame.width, height: 2000)
-       
-    }
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        print(navigationController?.navigationBar.frame.size)
-       
     }
 }
